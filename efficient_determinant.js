@@ -1,5 +1,8 @@
-const prime_numbers = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
 //http://www.math.odu.edu/~bogacki/cgi-bin/lat.cgi
+const path = require('path')
+
+const {simplify_list} = require(path.resolve(__dirname, 'math_utility.js'));
+
 class MatrixRow {
 	constructor(rowData, rowNumber){
 		this.rowData = rowData;
@@ -37,26 +40,10 @@ class MatrixRow {
 	}
 	//Continuously tries to reduce the numbers until it can't anymore
 	simplifyRow() {
-		let simplifyCoefficient = 1;
-		console.log(`Attempting to simplify row ${this.rowData}`);
-		//creates a copy of the prime numbers array
-		let relevant_primes = prime_numbers.slice().reverse();
-		for(let n = 0; relevant_primes.length > 0; ++n) {
-			let rowData = this.rowData.map((item)=>item/relevant_primes[n]);
-			if(rowData.every((item)=>Number.isInteger(item))) {
-				this.rowData = rowData;
-				console.log(`${relevant_primes[n]} is a relevant prime`);
-				simplifyCoefficient *= relevant_primes[n];
-				--n;
-			} else {
-				//This removes the irrelevant prime number, and moves our counter back so we don't skip numbers
-				console.log(`${relevant_primes[n]} is an irrelevant prime (n=${n})`);
-				relevant_primes.splice(n, 1);
-				console.log(`Remaining primes are ${relevant_primes} (L=${relevant_primes.length})`);
-				--n;
-			}
-		}
-		return simplifyCoefficient;
+		//destructuring assignment
+		let [simplified_rowData, simplify_coefficient] = simplify_list(this.rowData);
+		this.rowData = simplified_rowData;
+		return simplify_coefficient;
 	}
 	length() {
 		return this.rowData.length;
@@ -101,6 +88,8 @@ class Matrix {
 		this.matrixData.forEach((row)=>{
 			simplifyCoefficientAggregate *= row.simplifyRow();
 		});
+		console.log(`Simplified Matrix: `);
+		this.printDump();
 		return simplifyCoefficientAggregate;
 	}
 }
@@ -154,7 +143,6 @@ function calculateDeterminant(matrix) {
 	let triangularReducedMatrix = upperTriangularReduce(matrix);
 	let partialDeterminant = 1;
 	partialDeterminant *= triangularReducedMatrix.simplifyMatrix();
-	triangularReducedMatrix.printDump();
 	for(let i = 0; i < triangularReducedMatrix.columnLength(); ++i) {
 		console.log(`Triangular Reduced Matrix ${i}, ${i} is ${triangularReducedMatrix.getEntry(i, i)}`);
 		partialDeterminant *= triangularReducedMatrix.getEntry(i, i);
