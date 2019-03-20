@@ -26,7 +26,7 @@ class MatrixRow {
 			console.log(`Row ${candidateRow.toString()} was rejected for being equal to this row.`);
 			return false;
 		}
-		if(candidateRow.getRowData().reduce((accum, entry)=>entry==0)) {
+		if(candidateRow.getRowData().every((entry) => entry === 0)) {
 			console.log(`Row ${candidateRow.toString()} was rejected for being all zero.`);
 			return false;
 		}
